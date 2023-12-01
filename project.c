@@ -34,7 +34,14 @@ poly *lirepoly(int n){
     return p;
     free(nv); }
 //AFFICHAGE
-
+void affichpoly (poly *p,int n){
+    float g;
+    printf("\nP(x)= %.1f",p->c);
+    p=p->P;
+    for (int i = 0; i < n ; i++)
+    {if (p->c==0){p=p->P;}
+        else printf(" + %.1fx^%d",  p->c, p->d);
+             p=p->P;}}
 
 //CALCULE EN UN POIN
 float evaluepoly(poly *p,int n,float x){
