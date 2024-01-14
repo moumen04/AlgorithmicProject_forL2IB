@@ -2,6 +2,8 @@
 #include <stdlib.h>
 #include "raylib.h"
 #include <string.h>
+#include <unistd.h>
+
 //******DECLARATION BOUTON******
     typedef struct bouton{
         Rectangle rect;
@@ -75,31 +77,36 @@ void swap(liste * a,liste *b){
      int ypos=200 +pos_y;
      while(temp !=NULL) {
          Color listecolor=temp->swaping ? YELLOW :color;
-         DrawRectangle(xpos,ypos -temp->info *2,20,temp->info *2,listecolor);
+         DrawRectangle(xpos,ypos -temp->info *2,30,temp->info *2,listecolor);
          DrawText(TextFormat("%d",temp->info),xpos+5,ypos -temp->info-10,10,BLACK);
-         xpos+=30;
+         xpos+=45;
          temp->swaping=false;
          temp=temp->suiv;
      }
  }
  
  
- //******MAIN FONCTION******
+//******MAIN FONCTION******
  int main (){
      int win_widht=1000;
      int win_height=1000;
+     //******WINDOW INITIALISATION******
      InitWindow(win_widht,win_height,"TRI PAR SELECTION");
+     SetTargetFPS(60);
      
+     //******DECLARATION LISTE******
      liste* non_trie=NULL;
      liste* trie=NULL;
      
+     //******MAIN VARIABLES******
      
-     SetTargetFPS(60);
-     int fin_animation=0;
      int start=0;
      int textlength=0;
      char input[32]= "";
      int i=0;
+     bool over=false;
+     
+     //******MAIN BOUTONS******
      bouton bout_stop;
      bouton bout_start;
      bouton bout_insert;
@@ -108,6 +115,9 @@ void swap(liste * a,liste *b){
      bouton bout_queu;
      bouton bout_val;
      bouton bout_pos;
+     bouton bout_vide;
+     bouton bout_exit;
+     //******INITIALISATION DES BOUTON******
      init_bouton(&bout_start,(Rectangle){400,700,200,80},GREEN);
      init_bouton(&bout_stop,(Rectangle){400,700,200,80},RED);
      init_bouton(&bout_insert,(Rectangle){100,700,200,80},GREEN);
@@ -116,13 +126,16 @@ void swap(liste * a,liste *b){
      init_bouton(&bout_queu,(Rectangle){550,460,200,80},BLUE);
      init_bouton(&bout_val,(Rectangle){250,460,200,80},BLUE);
      init_bouton(&bout_pos,(Rectangle){550,460,200,80},BLUE);
+     init_bouton(&bout_vide,(Rectangle){810,850,90,45},DARKGRAY);
+     init_bouton(&bout_exit,(Rectangle){100,850,90,45},DARKGRAY);
      
      
      
      
      
-     
-     while(!WindowShouldClose() && !fin_animation){
+     //******WINDOW START******
+     while(!WindowShouldClose()){
+         //******FIRST WINDOW SETTINGS******
          if(start==0){
              if(click_bouton(&bout_stop)){
                 start=1; 
@@ -141,17 +154,39 @@ void swap(liste * a,liste *b){
              EndDrawing();
          }
          
-         
+         //******WINDOW OF TREATEMENT******
          if(start==1){
+             
+             //******CLICK BOUTONS TEST******
              if(click_bouton(&bout_stop)){
                 start=2; 
+                over=false;
              }
              if(click_bouton(&bout_insert)){
                  start=3;
+                 over=false;
              }
              if(click_bouton(&bout_supp)){
                  start=4;
+                 over=false;
              }
+             if(click_bouton(&bout_vide)){
+                 start=9;
+                 over=false;
+             }
+             if(click_bouton(&bout_exit)){
+                 start=-1;
+             }
+             
+             //******AFFICHAGE DE MESSAGE D'ERREUR******
+             if(i==0){
+                 bout_vide.color=RED;
+             }
+             else{
+                 bout_vide.color=DARKGRAY;
+             }
+             
+             //******SCANER LE NOMBRE
              if(textlength<31){
                  int key=GetKeyPressed();
                  if ((key >= KEY_ZERO) && (key <= KEY_NINE)) {
@@ -165,11 +200,8 @@ void swap(liste * a,liste *b){
                 }
                  if(key == KEY_SPACE){
                 input[textlength]='-';
-                textlength++;}
-                 
-             }
-             
-             
+                textlength++;}                 
+             }            
              if (IsKeyPressed(KEY_ENTER)) {
             // Convert the input text to a float
             int info = (int) atoi(input);  
@@ -177,15 +209,15 @@ void swap(liste * a,liste *b){
              i=1;    
             // Clear the input text after pressing Enter
             textlength = 0;
-            memset(input, 0, sizeof(input));
-           
-            
+            memset(input, 0, sizeof(input));            
             }
+            
+            //******DESSINER LA PAGE DE TRAITEMENT******
         BeginDrawing();
         ClearBackground(RAYWHITE); 
         
         DrawRectangleRec(bout_stop.rect,bout_stop.color);
-        DrawText("SORT TH LIST",bout_stop.rect.x+bout_stop.rect.width/2-MeasureText("SORT THE LIST",20)/2,bout_stop.rect.y+bout_stop.rect.height/2-10,20,BLACK);
+        DrawText("SORT THE LIST",bout_stop.rect.x+bout_stop.rect.width/2-MeasureText("SORT THE LIST",20)/2,bout_stop.rect.y+bout_stop.rect.height/2-10,20,BLACK);
         DrawRectangleLines(bout_stop.rect.x,bout_stop.rect.y,bout_stop.rect.width,bout_stop.rect.height,BLACK);
         
         DrawRectangleRec(bout_insert.rect,bout_insert.color);
@@ -195,36 +227,33 @@ void swap(liste * a,liste *b){
         DrawRectangleRec(bout_supp.rect,bout_supp.color);
         DrawText("SUPP ELEMT",bout_supp.rect.x+bout_supp.rect.width/2-MeasureText("SUPP ELEMT",20)/2,bout_supp.rect.y+bout_supp.rect.height/2-10,20,BLACK);
         DrawRectangleLines(bout_supp.rect.x,bout_supp.rect.y,bout_supp.rect.width,bout_supp.rect.height,BLACK);
+        
+        DrawRectangleRec(bout_vide.rect,bout_vide.color);
+        DrawText("VOID",bout_vide.rect.x+bout_vide.rect.width/2-MeasureText("VOID",20)/2,bout_vide.rect.y+bout_vide.rect.height/2-10,20,YELLOW);
+        DrawRectangleLines(bout_vide.rect.x,bout_vide.rect.y,bout_vide.rect.width,bout_vide.rect.height,BLACK);
+        
+        DrawRectangleRec(bout_exit.rect,bout_exit.color);
+        DrawText("EXIT",bout_exit.rect.x+bout_exit.rect.width/2-MeasureText("EXIT",20)/2,bout_exit.rect.y+bout_exit.rect.height/2-10,20,YELLOW);
+        DrawRectangleLines(bout_exit.rect.x,bout_exit.rect.y,bout_exit.rect.width,bout_exit.rect.height,BLACK);
+        
+        DrawText("Enter a Number to the List:", 10, 10, 30, DARKGRAY);
+        DrawText(input,MeasureText("Enter a Number to the List: ",30), 10, 30, DARKGRAY);
+        if(over){
+            DrawText("YOUR POSITION IS OVER THE LIST CAPACITY",500-MeasureText("YOUR POSITION IS OVER THE LIST CAPACITY",30)/2,500,30,BLACK);
+        }
+        
+        //******DESSINER LA LISTE SI ELLE EXISTE******
         if (i>0){
             drawlist(non_trie, BLUE, 10, 50);      
             DrawText("List not sorted", 10, 50, 20, RED);
         } 
-        DrawText("Enter a Number to the List:", 10, 10, 30, DARKGRAY);
-        DrawText(input,MeasureText("Enter a Number to the List: ",30), 10, 30, DARKGRAY); 
-           
-        EndDrawing();    
-           
-    
-             
-             
-             
-         }
-         
-         
-         if(start==2){
-             BeginDrawing();
-             ClearBackground(RAYWHITE); 
-            DrawText("**YOU HAVE FINISHED ENTERING NUMBERS**",10,50,20,DARKGRAY);
-            EndDrawing();
-        }
-         
-         
-         
-         
-         
-         
+        EndDrawing();
+         }   
+            
+        //******WINDOW OF SORTING******
          if(start==2){
          liste *temp= non_trie;
+         trie=NULL;
          while(temp !=NULL){
              ajouter(&trie,temp->info);
              temp=temp->suiv;
@@ -243,6 +272,8 @@ void swap(liste * a,liste *b){
                      temp2=temp2->suiv;
                  }
                  min->swaping=true;
+                 
+                 //******AFFICHAGE DES DEUS LISTES******
                  BeginDrawing();
                  ClearBackground(RAYWHITE);
                  
@@ -256,7 +287,7 @@ void swap(liste * a,liste *b){
                  
                  EndDrawing();
                  
-                 SetTargetFPS(1.0 / 0.5); //pause
+                 usleep(800000); //pause
                  
                  swap(temp, min);
                  
@@ -273,13 +304,17 @@ void swap(liste * a,liste *b){
 
                  EndDrawing();
                  
-                 SetTargetFPS(1.0 / 0.5);//pause
+                 usleep(800000);//pause
                  
                  temp=temp->suiv;
              }
-             fin_animation=1;
+             
+             start=1;//retourner a la page de traitement
+             non_trie=trie;//charge la liste trie 
          }        
      }
+     
+        //******INSERT WINDOW H/Q******
         if(start==3){
             if(click_bouton(&bout_head)){
                 start=5;
@@ -300,7 +335,7 @@ void swap(liste * a,liste *b){
         
         EndDrawing();}
      
-     
+        //******SUPP WINDOW V/P******
         if(start==4){
             if(click_bouton(&bout_val)){
                 start=7;
@@ -321,6 +356,7 @@ void swap(liste * a,liste *b){
         
         EndDrawing();}
         
+        //******INSERT NUMBER IN HEAD******
         if(start==5){
            if(textlength<31){
                  int key=GetKeyPressed();
@@ -340,13 +376,21 @@ void swap(liste * a,liste *b){
              }
                 if (IsKeyPressed(KEY_ENTER)) {
             // Convert the input text to an intigar 
-            int info = (int) atoi(input);  
+            int info = (int) atoi(input); 
+            if(non_trie==NULL){
+                non_trie=add_liste();
+                non_trie->info=info;
+                non_trie->swaping=false;
+                non_trie->suiv=NULL;
+                non_trie->prec=NULL;
+            }
+            else{
             liste *temp=add_liste();
             temp->info=info;
             temp->suiv=non_trie;
             temp->swaping=false;
             non_trie->prec=temp;
-            non_trie=temp;
+            non_trie=temp;}
             
             start=1;
             i=1;
@@ -366,6 +410,7 @@ void swap(liste * a,liste *b){
         EndDrawing();
         }
         
+            //******INSERT NUMBER IN QUEUE******
             if(start==6){
                 if(textlength<31){
                  int key=GetKeyPressed();
@@ -384,7 +429,15 @@ void swap(liste * a,liste *b){
              }    
              if (IsKeyPressed(KEY_ENTER)) {
             // Convert the input text to an intigar 
-            int info = (int) atoi(input);  
+            int info = (int) atoi(input);
+            if(non_trie==NULL){
+                non_trie=add_liste();
+                non_trie->info=info;
+                non_trie->swaping=false;
+                non_trie->suiv=NULL;
+                non_trie->prec=NULL;
+            }  
+            else{            
             liste *temp=non_trie;
             liste *temp1=add_liste();
             temp1->info=info;
@@ -395,7 +448,7 @@ void swap(liste * a,liste *b){
             }
             temp1->prec=temp;
             temp1->suiv=NULL;
-            temp->suiv=temp1;
+            temp->suiv=temp1;}
             
             start=1;
             i=1;
@@ -414,6 +467,7 @@ void swap(liste * a,liste *b){
                 
             }
             
+            //******SUPP NUMBER WITH VALUE******
             if(start==7){
                  if(textlength<31){
                  int key=GetKeyPressed();
@@ -431,7 +485,8 @@ void swap(liste * a,liste *b){
              } 
               if (IsKeyPressed(KEY_ENTER)) {
             // Convert the input text to an intigar 
-            int info = (int) atoi(input);  
+            int info = (int) atoi(input); 
+            if(non_trie!=NULL){            
             liste *temp=non_trie->suiv;
             liste *temp1=non_trie;
             while(temp!=NULL){
@@ -440,7 +495,7 @@ void swap(liste * a,liste *b){
                 }
                 temp=temp->suiv;
                 temp1=temp1->suiv;
-            }
+            }}
             
             start=1;
             i=1;
@@ -459,7 +514,7 @@ void swap(liste * a,liste *b){
              
             }
             
-            
+            //******SUPP NUMBER WITH POSITION******
             if(start==8){
                 if(textlength<31){
                  int key=GetKeyPressed();
@@ -480,7 +535,8 @@ void swap(liste * a,liste *b){
              
              if (IsKeyPressed(KEY_ENTER)) {
             // Convert the input text to an intigar 
-            int info = (int) atoi(input);  
+            int info = (int) atoi(input); 
+            if(non_trie!=NULL){
             int count=0;
             liste *temp=non_trie;
             while(temp!=NULL){
@@ -494,8 +550,9 @@ void swap(liste * a,liste *b){
                     temp=temp->suiv;
                     temp1=temp1->suiv;
                 }
+            
                 temp1->suiv=temp->suiv;
-            }
+            }else{over=true;}}
             
             start=1;
             i=1;
@@ -512,33 +569,19 @@ void swap(liste * a,liste *b){
             DrawText(input,MeasureText("Enter Position: ",30), 10, 30, DARKGRAY);
             EndDrawing();
             }
+            
+            //******VIDER LA LISTE******
+            if(start==9){
+                non_trie=NULL;
+                i=0;
+                start=1;
+            }
+            //******EXIT PROGRAMM******
+            if(start==-1){
+                CloseWindow();
+            }
      
      }
-     CloseWindow();
+     
      return 0;
  }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
